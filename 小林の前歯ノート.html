@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小林の前歯ノート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent: #c0392b;
+    --ui-bg: #2c2420;
+    --ui-text: #f0ebe3;
+  }
+
+  body {
+    font-family: 'Noto Serif JP', serif;
+    background: #1a1208;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(100,60,20,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(80,40,10,0.2) 0%, transparent 50%);
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0 16px;
+  }
+  .logo {
+    font-family: 'Caveat', cursive; font-size: 30px; color: var(--ui-text);
+    letter-spacing: 2px; text-shadow: 0 0 20px rgba(255,200,100,0.3);
+  }
+  .toolbar {
+    display: flex; gap: 6px; background: var(--ui-bg);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 40px;
+    padding: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .tool-btn {
+    display: flex; align-items: center; gap: 5px; padding: 7px 14px;
+    border: none; border-radius: 30px; cursor: pointer;
+    font-family: 'Noto Serif JP', serif; font-size: 12px;
+    transition: all 0.2s; background: transparent; color: rgba(240,235,227,0.55);
+  }
+  .tool-btn.active { background: var(--accent); color: white; box-shadow: 0 2px 10px rgba(192,57,43,0.4); }
+  .tool-btn:hover:not(.active) { background: rgba(255,255,255,0.08); color: var(--ui-text); }
+  .tool-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* ── Controls ── */
+  .controls {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .color-swatch {
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.15s; flex-shrink: 0;
+  }
+  .color-swatch.selected { border-color: white; transform: scale(1.2); }
+  .size-slider {
+    -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.15); outline: none; width: 70px; cursor: pointer;
+  }
+  .size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 13px; height: 13px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+  }
+  .sub-btn {
+    padding: 4px 11px; border-radius: 20px; background: transparent;
+    font-size: 11px; cursor: pointer; transition: all 0.2s; font-family: 'Noto Serif JP', serif;
+  }
+  .eraser-btn { border: 1px solid rgba(255,255,255,0.15); color: rgba(240,235,227,0.7); }
+  .eraser-btn.active { background: rgba(255,255,255,0.12); color: white; border-color: rgba(255,255,255,0.3); }
+  .eraser-btn:hover { background: rgba(255,255,255,0.08); }
+  .clear-btn { border: 1px solid rgba(192,57,43,0.4); color: rgba(192,57,43,0.8); margin-left: auto; }
+  .clear-btn:hover { background: rgba(192,57,43,0.12); }
+  .label { color: rgba(240,235,227,0.35); font-size: 11px; }
+
+  /* ── Background picker ── */
+  .bg-bar {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .bg-opt {
+    width: 36px; height: 26px; border-radius: 5px; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1); transition: all 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .bg-opt:hover { border-color: rgba(255,255,255,0.4); transform: scale(1.05); }
+  .bg-opt.selected { border-color: white; box-shadow: 0 0 8px rgba(255,255,255,0.3); }
+  .bg-opt[data-bg="plain"]      { background: #faf8f2; }
+  .bg-opt[data-bg="ruled"]      { background: #faf8f2; background-image: repeating-linear-gradient(transparent,transparent 15px,#d0c8b8 15px,#d0c8b8 16px); }
+  .bg-opt[data-bg="grid"]       { background: #faf8f2; background-image: linear-gradient(#ddd 1px,transparent 1px),linear-gradient(90deg,#ddd 1px,transparent 1px); background-size: 14px 14px; }
+  .bg-opt[data-bg="dotgrid"]    { background: #faf8f2; background-image: radial-gradient(circle,#aaa 1px,transparent 1px); background-size: 10px 10px; }
+  .bg-opt[data-bg="dark"]       { background: #1e1e2e; }
+  .bg-opt[data-bg="dark-ruled"] { background: #1e1e2e; background-image: repeating-linear-gradient(transparent,transparent 15px,rgba(255,255,255,0.08) 15px,rgba(255,255,255,0.08) 16px); }
+  .bg-opt[data-bg="kraft"]      { background: #c8a97a; }
+  .bg-opt[data-bg="kraft-ruled"]{ background: #c8a97a; background-image: repeating-linear-gradient(transparent,transparent 15px,rgba(0,0,0,0.1) 15px,rgba(0,0,0,0.1) 16px); }
+  .bg-opt[data-bg="green"]      { background: #1a3a2a; background-image: repeating-linear-gradient(transparent,transparent 15px,rgba(0,255,100,0.1) 15px,rgba(0,255,100,0.1) 16px); }
+  .bg-opt[data-bg="blueprint"]  { background: #1a2a4a; background-image: linear-gradient(rgba(100,160,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(100,160,255,0.15) 1px,transparent 1px); background-size: 14px 14px; }
+
+  /* ── IO bar ── */
+  .io-bar {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .io-btn {
+    display: flex; align-items: center; gap: 5px; padding: 5px 13px;
+    border-radius: 20px; font-size: 11px; cursor: pointer; transition: all 0.2s;
+    font-family: 'Noto Serif JP', serif;
+  }
+  .io-btn svg { width: 12px; height: 12px; }
+  .io-btn.export { background: rgba(100,180,100,0.06); border: 1px solid rgba(100,200,100,0.25); color: rgba(120,210,120,0.8); }
+  .io-btn.export:hover { background: rgba(100,180,100,0.15); color: #7dd87d; }
+  .io-btn.import { background: rgba(100,150,220,0.06); border: 1px solid rgba(120,160,240,0.25); color: rgba(130,170,245,0.8); }
+  .io-btn.import:hover { background: rgba(100,150,220,0.15); color: #90b8f8; }
+  .io-hint { color: rgba(240,235,227,0.18); font-size: 10px; margin-left: auto; }
+
+  /* ── Page tabs ── */
+  .page-nav {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 4px;
+    margin-bottom: 0; overflow-x: auto; padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .page-nav::-webkit-scrollbar { display: none; }
+  .page-tab {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 8px 8px 0 0; cursor: pointer;
+    font-size: 12px; transition: all 0.15s; white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.07); border-bottom: none;
+    background: rgba(255,255,255,0.04); color: rgba(240,235,227,0.4);
+    font-family: 'Noto Serif JP', serif; position: relative;
+  }
+  .page-tab:hover { background: rgba(255,255,255,0.08); color: rgba(240,235,227,0.7); }
+  .page-tab.active {
+    background: #faf8f2; color: #1a1410; font-weight: 600;
+    border-color: rgba(255,255,255,0.15);
+  }
+  .page-tab.active[data-bg="dark"],
+  .page-tab.active[data-bg="dark-ruled"],
+  .page-tab.active[data-bg="green"],
+  .page-tab.active[data-bg="blueprint"] {
+    background: #1e1e2e; color: #e0e0f0;
+  }
+  .page-tab.active[data-bg="kraft"],
+  .page-tab.active[data-bg="kraft-ruled"] {
+    background: #c8a97a; color: #3a2a10;
+  }
+  .page-tab .del-tab {
+    opacity: 0; font-size: 13px; line-height: 1; margin-left: 2px;
+    color: #c0392b; background: none; border: none; cursor: pointer; padding: 0;
+    transition: opacity 0.15s;
+  }
+  .page-tab:hover .del-tab { opacity: 1; }
+  .add-page-btn {
+    padding: 6px 12px; border-radius: 8px 8px 0 0;
+    background: transparent; border: 1px dashed rgba(255,255,255,0.15);
+    border-bottom: none; color: rgba(240,235,227,0.35);
+    cursor: pointer; font-size: 18px; line-height: 1;
+    transition: all 0.15s;
+  }
+  .add-page-btn:hover { background: rgba(255,255,255,0.06); color: rgba(240,235,227,0.7); }
+
+  /* ── Notebook ── */
+  .notebook {
+    width: 100%; max-width: 860px;
+    border-radius: 0 4px 12px 4px;
+    box-shadow: -8px 4px 0 #c8b89a, -16px 8px 0 #b8a88a,
+      0 8px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+    position: relative; overflow: hidden; min-height: 520px;
+    transition: background 0.3s;
+  }
+
+  /* Background styles applied via class */
+  .notebook.bg-plain      { background: #faf8f2; }
+  .notebook.bg-ruled      { background: #faf8f2; background-image: repeating-linear-gradient(transparent,transparent 31px,#e0d8c8 31px,#e0d8c8 32px); }
+  .notebook.bg-grid       { background: #faf8f2; background-image: linear-gradient(#ddd 1px,transparent 1px),linear-gradient(90deg,#ddd 1px,transparent 1px); background-size: 32px 32px; }
+  .notebook.bg-dotgrid    { background: #faf8f2; background-image: radial-gradient(circle,#aaa 1.5px,transparent 1.5px); background-size: 24px 24px; }
+  .notebook.bg-dark       { background: #1e1e2e; }
+  .notebook.bg-dark-ruled { background: #1e1e2e; background-image: repeating-linear-gradient(transparent,transparent 31px,rgba(255,255,255,0.07) 31px,rgba(255,255,255,0.07) 32px); }
+  .notebook.bg-kraft      { background: #c8a97a; }
+  .notebook.bg-kraft-ruled{ background: #c8a97a; background-image: repeating-linear-gradient(transparent,transparent 31px,rgba(0,0,0,0.1) 31px,rgba(0,0,0,0.1) 32px); }
+  .notebook.bg-green      { background: #1a3a2a; background-image: repeating-linear-gradient(transparent,transparent 31px,rgba(0,200,80,0.12) 31px,rgba(0,200,80,0.12) 32px); }
+  .notebook.bg-blueprint  { background: #1a2a4a; background-image: linear-gradient(rgba(100,160,255,0.12) 1px,transparent 1px),linear-gradient(90deg,rgba(100,160,255,0.12) 1px,transparent 1px); background-size: 32px 32px; }
+
+  /* Margin line (only on light themes) */
+  .notebook.bg-plain::after,
+  .notebook.bg-ruled::after,
+  .notebook.bg-grid::after,
+  .notebook.bg-dotgrid::after,
+  .notebook.bg-kraft::after,
+  .notebook.bg-kraft-ruled::after {
+    content: ''; position: absolute; left: 60px; top: 0; bottom: 0;
+    width: 1px; background: rgba(192,57,43,0.25); pointer-events: none; z-index: 1;
+  }
+
+  .spiral {
+    position: absolute; left: -8px; top: 0; bottom: 0; width: 16px;
+    z-index: 10; pointer-events: none;
+    display: flex; flex-direction: column; justify-content: space-evenly;
+    align-items: center; padding: 20px 0;
+  }
+  .hole { width: 12px; height: 12px; border-radius: 50%; background: #1a1208; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); }
+
+  canvas#drawing {
+    position: absolute; inset: 0; z-index: 2; cursor: crosshair; touch-action: none;
+  }
+  textarea#textInput {
+    position: absolute; inset: 0; z-index: 3; background: transparent;
+    border: none; outline: none; resize: none;
+    padding: 16px 24px 16px 72px;
+    font-family: 'Noto Serif JP', serif; font-size: 15px;
+    line-height: 32px; letter-spacing: 0.02em;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  }
+  textarea#textInput.active { pointer-events: all; opacity: 1; cursor: text; }
+
+  /* Text color per bg */
+  .notebook.bg-plain textarea, .notebook.bg-ruled textarea,
+  .notebook.bg-grid textarea, .notebook.bg-dotgrid textarea { color: #1a1410; }
+  .notebook.bg-dark textarea, .notebook.bg-dark-ruled textarea,
+  .notebook.bg-green textarea, .notebook.bg-blueprint textarea { color: #e8e8f0; }
+  .notebook.bg-kraft textarea, .notebook.bg-kraft-ruled textarea { color: #3a2a10; }
+
+  /* ── Stamp picker ── */
+  .stamp-bar {
+    width: 100%; max-width: 860px;
+    display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;
+  }
+  .stamp-opt {
+    width: 42px; height: 42px; border-radius: 10px; cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; transition: all 0.15s; line-height: 1; user-select: none;
+  }
+  .stamp-opt:hover { border-color: rgba(255,255,255,0.4); transform: scale(1.1); background: rgba(255,255,255,0.1); }
+  .stamp-opt.selected { border-color: #f1c40f; box-shadow: 0 0 10px rgba(241,196,15,0.4); background: rgba(241,196,15,0.1); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: #2c2420; color: var(--ui-text);
+    padding: 9px 20px; border-radius: 30px; font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999;
+    font-family: 'Noto Serif JP', serif;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">小林の前歯ノート</div>
+  <div class="toolbar">
+    <button class="tool-btn active" id="drawBtn" onclick="setMode('draw')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>手コキ
+    </button>
+    <button class="tool-btn" id="textBtn" onclick="setMode('text')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 7 4 4 20 4 20 7"/>
+        <line x1="9" y1="20" x2="15" y2="20"/>
+        <line x1="12" y1="4" x2="12" y2="20"/>
+      </svg>文字挿入
+    </button>
+    <button class="tool-btn" id="stampBtn" onclick="setMode('stamp')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2a5 5 0 015 5c0 2-1 3.5-2.5 4.5V13h-5v-1.5C8 10.5 7 9 7 7a5 5 0 015-5z"/>
+        <rect x="9" y="13" width="6" height="3" rx="1"/>
+        <line x1="7" y1="20" x2="17" y2="20" stroke-width="2.5"/>
+      </svg>前歯を追加
+    </button>
+  </div>
+</header>
+
+<!-- Draw controls -->
+<div class="controls" id="drawControls">
+  <span class="label">色盲：</span>
+  <div style="display:flex;gap:5px;align-items:center">
+    <div class="color-swatch selected" style="background:#1a1410" data-color="#1a1410" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#c0392b" data-color="#c0392b" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#2980b9" data-color="#2980b9" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#27ae60" data-color="#27ae60" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#8e44ad" data-color="#8e44ad" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#e67e22" data-color="#e67e22" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#f1c40f" data-color="#f1c40f" onclick="setColor(this)"></div>
+    <div class="color-swatch" style="background:#ecf0f1" data-color="#ecf0f1" onclick="setColor(this)"></div>
+  </div>
+  <span class="label" style="margin-left:6px">太さ：</span>
+  <input type="range" class="size-slider" id="brushSize" min="1" max="20" value="3">
+  <button class="sub-btn eraser-btn" id="eraserBtn" onclick="toggleEraser()">消しゴム</button>
+  <button class="sub-btn clear-btn" onclick="clearPage()">ページ消去</button>
+</div>
+<div class="controls" id="textControls" style="display:none">
+  <span class="label">テキストエリアに興味のある文字を入力できます</span>
+</div>
+
+<!-- Stamp controls -->
+<div class="stamp-bar" id="stampControls" style="display:none">
+  <span class="label">飽きないスタンプ：</span>
+  <!-- 前歯メイン -->
+  <div class="stamp-opt selected" data-stamp="teeth_front" title="前歯" onclick="setStamp(this)">🦷</div>
+  <!-- 歯系 -->
+  <div class="stamp-opt" data-stamp="tooth" title="歯" onclick="setStamp(this)">🦷</div>
+  <div class="stamp-opt" data-stamp="teeth_smile" title="歯の笑顔" onclick="setStamp(this)">😁</div>
+  <div class="stamp-opt" data-stamp="toothbrush" title="歯ブラシ" onclick="setStamp(this)">🪥</div>
+  <!-- 表情 -->
+  <div class="stamp-opt" data-stamp="smile" title="笑顔" onclick="setStamp(this)">😊</div>
+  <div class="stamp-opt" data-stamp="star" title="星" onclick="setStamp(this)">⭐</div>
+  <div class="stamp-opt" data-stamp="heart" title="ハート" onclick="setStamp(this)">❤️</div>
+  <div class="stamp-opt" data-stamp="check" title="チェック" onclick="setStamp(this)">✅</div>
+  <div class="stamp-opt" data-stamp="fire" title="炎" onclick="setStamp(this)">🔥</div>
+  <div class="stamp-opt" data-stamp="lightning" title="雷" onclick="setStamp(this)">⚡</div>
+  <div class="stamp-opt" data-stamp="pin" title="ピン" onclick="setStamp(this)">📌</div>
+  <div class="stamp-opt" data-stamp="pencil" title="鉛筆" onclick="setStamp(this)">✏️</div>
+  <span class="label" style="margin-left:8px">サイズ：</span>
+  <input type="range" class="size-slider" id="stampSize" min="20" max="120" value="48">
+  <span class="label" style="margin-left:8px">回転：</span>
+  <input type="range" class="size-slider" id="stampRotation" min="0" max="360" value="0" style="width:90px">
+  <span class="label" id="rotationLabel" style="min-width:30px">0°</span>
+  <button class="sub-btn eraser-btn" onclick="document.getElementById('stampRotation').value=0;stampAngle=0;document.getElementById('rotationLabel').textContent='0°';updateStampPreview()">↺</button>
+  <!-- Live preview -->
+  <canvas id="stampPreview" width="52" height="52" style="border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);margin-left:6px;flex-shrink:0;"></canvas>
+</div>
+
+<!-- Background picker -->
+<div class="bg-bar">
+  <span class="label">背景：</span>
+  <div class="bg-opt selected" data-bg="ruled"       title="横罫線"       onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="plain"        title="無地"         onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="grid"         title="方眼"         onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="dotgrid"      title="ドット方眼"   onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="dark"         title="ダーク無地"   onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="dark-ruled"   title="ダーク罫線"   onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="kraft"        title="クラフト紙"   onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="kraft-ruled"  title="クラフト罫線" onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="green"        title="黒板"         onclick="setBg(this)"></div>
+  <div class="bg-opt"         data-bg="blueprint"    title="青写真"       onclick="setBg(this)"></div>
+</div>
+
+<!-- IO bar -->
+<div class="io-bar">
+  <button class="io-btn export" onclick="exportNote()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>保存
+  </button>
+  <button class="io-btn import" onclick="document.getElementById('importInput').click()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>読み込む
+  </button>
+  <input type="file" id="importInput" accept=".json" style="display:none" onchange="importNote(event)">
+  <span class="io-hint">.json 形式で全ページ保存・復元</span>
+</div>
+
+<!-- Page tabs -->
+<div class="page-nav" id="pageNav"></div>
+
+<!-- Notebook -->
+<div class="notebook bg-ruled" id="notebook">
+  <div class="spiral">
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div>
+  </div>
+  <canvas id="drawing"></canvas>
+  <textarea id="textInput" placeholder="ここに興味のある文字を入力..."></textarea>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+const canvas   = document.getElementById('drawing');
+const ctx      = canvas.getContext('2d');
+const notebook = document.getElementById('notebook');
+const textarea = document.getElementById('textInput');
+
+let mode = 'draw', drawing = false, erasing = false;
+let currentColor = '#1a1410', brushSize = 3;
+let lastX = 0, lastY = 0;
+
+// Pages: array of { text, drawing(dataURL|null), bg }
+let pages = [{ text: '', drawing: null, bg: 'ruled' }];
+let currentPage = 0;
+
+// ── Canvas resize ──
+function resizeCanvas() {
+  const rect = notebook.getBoundingClientRect();
+  const tmp = canvas.toDataURL(); // preserve current
+  canvas.width  = rect.width;
+  canvas.height = rect.height;
+  const img = new Image();
+  img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  img.src = tmp;
+}
+window.addEventListener('resize', () => { saveCurrentPage(); resizeCanvas(); });
+
+// ── Mode ──
+function setMode(m) {
+  mode = m;
+  document.getElementById('drawBtn').classList.toggle('active', m === 'draw');
+  document.getElementById('textBtn').classList.toggle('active', m === 'text');
+  document.getElementById('stampBtn').classList.toggle('active', m === 'stamp');
+  document.getElementById('drawControls').style.display  = m === 'draw'  ? 'flex' : 'none';
+  document.getElementById('textControls').style.display  = m === 'text'  ? 'flex' : 'none';
+  document.getElementById('stampControls').style.display = m === 'stamp' ? 'flex' : 'none';
+  textarea.classList.toggle('active', m === 'text');
+  canvas.style.pointerEvents = (m === 'draw' || m === 'stamp') ? 'all' : 'none';
+  canvas.style.cursor = m === 'stamp' ? 'crosshair' : 'crosshair';
+  if (m === 'text') textarea.focus();
+}
+
+// ── Color ──
+function setColor(el) {
+  currentColor = el.dataset.color; erasing = false;
+  document.getElementById('eraserBtn').classList.remove('active');
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+document.getElementById('brushSize').addEventListener('input', e => { brushSize = parseInt(e.target.value); });
+
+function toggleEraser() {
+  erasing = !erasing;
+  document.getElementById('eraserBtn').classList.toggle('active', erasing);
+}
+
+// ── Stamp ──
+let currentStamp = 'teeth_front';
+let stampSize = 48;
+
+// Map stamp keys to emoji / SVG draw functions
+const STAMPS = {
+  teeth_front: null,  // custom drawn
+  tooth:       '🦷',
+  teeth_smile: '😁',
+  toothbrush:  '🪥',
+  smile:       '😊',
+  star:        '⭐',
+  heart:       '❤️',
+  check:       '✅',
+  fire:        '🔥',
+  lightning:   '⚡',
+  pin:         '📌',
+  pencil:      '✏️',
+};
+
+function setStamp(el) {
+  currentStamp = el.dataset.stamp;
+  document.querySelectorAll('.stamp-opt').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  updateStampPreview();
+}
+
+document.getElementById('stampSize').addEventListener('input', e => {
+  stampSize = parseInt(e.target.value);
+  updateStampPreview();
+});
+
+let stampAngle = 0; // degrees
+
+document.getElementById('stampRotation').addEventListener('input', e => {
+  stampAngle = parseInt(e.target.value);
+  document.getElementById('rotationLabel').textContent = stampAngle + '°';
+  updateStampPreview();
+});
+
+function updateStampPreview() {
+  const pc = document.getElementById('stampPreview');
+  if (!pc) return;
+  const pctx = pc.getContext('2d');
+  pctx.clearRect(0, 0, pc.width, pc.height);
+  const cx = pc.width / 2, cy = pc.height / 2;
+  pctx.save();
+  pctx.translate(cx, cy);
+  pctx.rotate(stampAngle * Math.PI / 180);
+  const previewSize = Math.min(38, stampSize * 0.7);
+  if (currentStamp === 'teeth_front') {
+    drawTeethOnCtx(pctx, 0, 0, previewSize);
+  } else {
+    const emoji = STAMPS[currentStamp];
+    if (emoji) {
+      pctx.font = `${previewSize}px serif`;
+      pctx.textAlign = 'center';
+      pctx.textBaseline = 'middle';
+      pctx.fillText(emoji, 0, 0);
+    }
+  }
+  pctx.restore();
+}
+
+function drawTeethOnCtx(c, x, y, size) {
+  const w = size * 1.6, h = size * 1.1;
+  const x0 = x - w / 2, y0 = y - h / 2;
+  const tw = w / 4;
+  c.beginPath();
+  c.ellipse(x, y0 + h * 0.18, w * 0.52, h * 0.22, 0, 0, Math.PI * 2);
+  c.fillStyle = '#f4a0a0'; c.fill();
+  const toothColors = ['#fffff0','#f8f8ee','#fffff0','#f8f8ee'];
+  for (let i = 0; i < 4; i++) {
+    const tx = x0 + i * tw + tw * 0.05, ty = y0 + h * 0.18;
+    const tw2 = tw * 0.9, th = h * 0.85, r = tw2 * 0.3;
+    c.beginPath();
+    c.moveTo(tx + r, ty); c.lineTo(tx + tw2 - r, ty);
+    c.quadraticCurveTo(tx + tw2, ty, tx + tw2, ty + r);
+    c.lineTo(tx + tw2, ty + th - r * 1.5);
+    c.quadraticCurveTo(tx + tw2, ty + th, tx + tw2 - r, ty + th);
+    c.lineTo(tx + r, ty + th);
+    c.quadraticCurveTo(tx, ty + th, tx, ty + th - r * 1.5);
+    c.lineTo(tx, ty + r); c.quadraticCurveTo(tx, ty, tx + r, ty);
+    c.closePath();
+    c.fillStyle = toothColors[i]; c.fill();
+    c.strokeStyle = '#c8b89a'; c.lineWidth = size * 0.025; c.stroke();
+    c.beginPath();
+    c.ellipse(tx + tw2 * 0.3, ty + th * 0.2, tw2 * 0.12, th * 0.08, -0.3, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(255,255,255,0.7)'; c.fill();
+  }
+  c.beginPath();
+  c.roundRect(x0, y0 + h * 0.15, w, h * 0.87, [size * 0.1, size * 0.1, size * 0.18, size * 0.18]);
+  c.strokeStyle = '#a89070'; c.lineWidth = size * 0.04; c.stroke();
+}
+
+function placeStamp(x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(stampAngle * Math.PI / 180);
+  if (currentStamp === 'teeth_front') {
+    drawTeethOnCtx(ctx, 0, 0, stampSize);
+  } else {
+    const emoji = STAMPS[currentStamp];
+    if (emoji) {
+      ctx.font = `${stampSize}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, 0, 0);
+    }
+  }
+  ctx.restore();
+}
+
+// ── Background ──
+function setBg(el, skipSave) {
+  if (!skipSave) saveCurrentPage();
+  const bg = el.dataset.bg;
+  pages[currentPage].bg = bg;
+  document.querySelectorAll('.bg-opt').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  notebook.className = 'notebook bg-' + bg;
+  renderPageTabs();
+}
+
+function applyBgUI(bg) {
+  document.querySelectorAll('.bg-opt').forEach(s => {
+    s.classList.toggle('selected', s.dataset.bg === bg);
+  });
+  notebook.className = 'notebook bg-' + bg;
+}
+
+// ── Draw ──
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function applyStroke(x1, y1, x2, y2) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+  if (erasing) {
+    ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = 'rgba(0,0,0,1)'; ctx.lineWidth = brushSize * 3;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke(); ctx.restore();
+  } else {
+    ctx.strokeStyle = currentColor; ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+  }
+}
+
+canvas.addEventListener('mousedown', e => {
+  if (mode === 'stamp') { placeStamp(...Object.values(getPos(e))); return; }
+  if (mode !== 'draw') return; drawing = true;
+  const p = getPos(e); lastX = p.x; lastY = p.y;
+  ctx.beginPath(); ctx.arc(lastX, lastY, (erasing ? brushSize * 3 : brushSize) / 2, 0, Math.PI * 2);
+  if (erasing) { ctx.save(); ctx.globalCompositeOperation='destination-out'; ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill(); ctx.restore(); }
+  else { ctx.fillStyle = currentColor; ctx.fill(); }
+});
+canvas.addEventListener('mousemove', e => {
+  if (!drawing || mode !== 'draw') return;
+  const p = getPos(e); applyStroke(lastX, lastY, p.x, p.y); lastX = p.x; lastY = p.y;
+});
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (mode === 'stamp') { placeStamp(...Object.values(getPos(e))); return; }
+  if (mode !== 'draw') return; drawing = true;
+  const p = getPos(e); lastX = p.x; lastY = p.y;
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault(); if (!drawing || mode !== 'draw') return;
+  const p = getPos(e); applyStroke(lastX, lastY, p.x, p.y); lastX = p.x; lastY = p.y;
+}, { passive: false });
+canvas.addEventListener('touchend', () => drawing = false);
+
+// ── Page management ──
+function saveCurrentPage() {
+  pages[currentPage].text    = textarea.value;
+  pages[currentPage].drawing = canvas.toDataURL('image/png');
+}
+
+function loadPage(idx) {
+  currentPage = idx;
+  const p = pages[idx];
+  textarea.value = p.text;
+  applyBgUI(p.bg);
+
+  const rect = notebook.getBoundingClientRect();
+  canvas.width  = rect.width;
+  canvas.height = rect.height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (p.drawing) {
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    img.src = p.drawing;
+  }
+  renderPageTabs();
+}
+
+function addPage() {
+  saveCurrentPage();
+  const bg = pages[currentPage].bg; // inherit bg from current
+  pages.push({ text: '', drawing: null, bg });
+  loadPage(pages.length - 1);
+}
+
+function deletePage(idx) {
+  if (pages.length === 1) { showToast('⚠ 最後のページは削除できません'); return; }
+  if (!confirm(`ページ ${idx + 1} を削除しますか？`)) return;
+  pages.splice(idx, 1);
+  const newIdx = Math.min(currentPage, pages.length - 1);
+  currentPage = -1; // force reload
+  loadPage(newIdx);
+}
+
+function renderPageTabs() {
+  const nav = document.getElementById('pageNav');
+  nav.innerHTML = '';
+  pages.forEach((p, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'page-tab' + (i === currentPage ? ' active' : '');
+    tab.dataset.bg = p.bg;
+    tab.innerHTML = `ページ ${i + 1}<button class="del-tab" title="削除" onclick="event.stopPropagation();deletePage(${i})">×</button>`;
+    tab.addEventListener('click', () => { if (i !== currentPage) { saveCurrentPage(); loadPage(i); } });
+    nav.appendChild(tab);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-page-btn';
+  addBtn.title = '新しいページ';
+  addBtn.textContent = '+';
+  addBtn.onclick = addPage;
+  nav.appendChild(addBtn);
+}
+
+function clearPage() {
+  if (confirm('このページの手書きを消去しますか？')) ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Export ──
+function exportNote() {
+  saveCurrentPage();
+  const data = { version: 2, savedAt: new Date().toISOString(), pages };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `note_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ 保存しました');
+}
+
+// ── Import ──
+function importNote(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) { showToast('⚠ 対応していないファイル形式です'); return; }
+      if (!confirm('現在のノートは上書きされます。続けますか？')) return;
+      // v1 compat
+      if (data.version === 1) {
+        pages = [{ text: data.text || '', drawing: data.drawing || null, bg: 'ruled' }];
+      } else {
+        pages = data.pages;
+      }
+      currentPage = -1;
+      loadPage(0);
+      showToast('✓ 読み込みました');
+    } catch { showToast('⚠ 読み込みに失敗しました'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── Init ──
+(function init() {
+  const rect = notebook.getBoundingClientRect();
+  canvas.width  = rect.width;
+  canvas.height = rect.height;
+  renderPageTabs();
+  updateStampPreview();
+})();
+</script>
+</body>
+</html>
